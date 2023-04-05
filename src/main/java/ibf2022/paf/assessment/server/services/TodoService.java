@@ -30,11 +30,10 @@ public class TodoService {
             User user = new User();
             user.setUsername(username);
             userRepo.insertUser(user);
+            bCompleted = true;
         }
         // Insert task
         taskRepo.insertTask(task);
-
-
         return bCompleted;
     }
 

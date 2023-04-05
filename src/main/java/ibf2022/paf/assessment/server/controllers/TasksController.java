@@ -36,22 +36,28 @@ public class TasksController {
 
         List<Task> tasks = new LinkedList<Task>();
         Integer i = 0;
-        while (form.getFirst("description-" + i) != null){
-            Task task = new Task();
-            task.setDescription(form.getFirst("description-" + i));
-            task.setPriority(form.getFirst("priority-" + i));
-            task.setDueDate(Date.valueOf(form.getFirst("dueDate-" + i)));
-            tasks.add(task);
-            i++;
-            Boolean added = todoSvc.upsertTask(form.getFirst("username"), task);
-            if (added) {
-                mav.setViewName("result");
-                mav.setStatus(HttpStatusCode.valueOf(200));
-                return mav;
+        try{
+            while (form.getFirst("description-" + i) != null){
+                Task task = new Task();
+                task.setDescription(form.getFirst("description-" + i));
+                task.setPriority(form.getFirst("priority-" + i));
+                task.setDueDate(Date.valueOf(form.getFirst("dueDate-" + i)));
+                todoSvc.upsertTask(form.getFirst(username), task);
+                tasks.add(task);
+                i++;
             }
+            Integer taskCount = i - 1;
+            
+            mav.setViewName("result");
+            mav.addObject("taskCount", taskCount);
+            mav.addObject("username", username);
+            mav.setStatus(HttpStatusCode.valueOf(200));
+            return mav;
+
+        } catch (Exception ex) {
+            mav.setViewName("error");
+            mav.setStatus(HttpStatusCode.valueOf(500));
+            return mav;
         }
-        mav.setViewName("error");
-        mav.setStatus(HttpStatusCode.valueOf(500));
-        return mav;
-       }
+    }
 }
