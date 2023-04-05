@@ -1,18 +1,14 @@
 package ibf2022.paf.assessment.server.controllers;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,8 +29,11 @@ public class TasksController {
     @PostMapping(path="/task", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                                 produces = "text/plain")
     
-    public ResponseEntity<String> postTask(@RequestParam MultiValueMap<String, String> form) {
-    
+    public ModelAndView postTask(@RequestParam String username, 
+                @RequestParam MultiValueMap<String, String> form) {
+        
+        ModelAndView mav = new ModelAndView();
+
         List<Task> tasks = new LinkedList<Task>();
         Integer i = 0;
         while (form.getFirst("description-" + i) != null){
@@ -44,15 +43,15 @@ public class TasksController {
             task.setDueDate(Date.valueOf(form.getFirst("dueDate-" + i)));
             tasks.add(task);
             i++;
+            Boolean added = todoSvc.upsertTask(form.getFirst("username"), task);
+            if (added) {
+                mav.setViewName("result");
+                mav.setStatus(HttpStatusCode.valueOf(200));
+                return mav;
+            }
         }
-        return ResponseEntity.ok().body("Success");
+        mav.setViewName("error");
+        mav.setStatus(HttpStatusCode.valueOf(500));
+        return mav;
        }
-
-    // @GetMapping
-    // public ModelAndView getResults() {
-    //     ModelAndView mav = new ModelAndView();
-    //     mav.setViewName("error");
-    //     mav.getStatus();
-    //     return mav;
-    // }
 }
