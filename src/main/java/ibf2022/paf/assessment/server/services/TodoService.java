@@ -19,17 +19,23 @@ public class TodoService {
     private UserRepository userRepo;
 
     @Transactional
-    public void upsertTask(User user, Task task) {
+    public Boolean upsertTask(String username, Task task) {
 
+        Boolean bCompleted = false;
         Boolean userExists = false;
         // Check if user exists
-        userExists = userRepo.findUserByUsername(user.getUsername()).isPresent();
+        userExists = userRepo.findUserByUsername(username).isPresent();
         // Create user if user does not exist
         if (!userExists) {
+            User user = new User();
+            user.setUsername(username);
             userRepo.insertUser(user);
         }
         // Insert task
         taskRepo.insertTask(task);
+
+
+        return bCompleted;
     }
 
 }
